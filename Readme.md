@@ -1,212 +1,212 @@
-# SPEED CAMERA - Object Motion Tracker [![Mentioned in Awesome <INSERT LIST NAME>](https://awesome.re/mentioned-badge.svg)](https://github.com/thibmaek/awesome-raspberry-pi)
-### RPI, Unix and Windows Speed Camera Using python, openCV, RPI camera module, USB Cam or IP Cam
-## For Details See [Program Features](https://github.com/pageauc/speed-camera/wiki/Program-Description#program-features), [Wiki Instructions](https://github.com/pageauc/speed-camera/wiki) and [YouTube Videos](https://github.com/pageauc/speed-camera#reference-links).
-
-## Note re Bullseye: 
-Speed-cam.py ver 11.26 and greater will now run under Raspberry Pi OS Bullseye or later with a pi camera module as well as usbcam and IP/RTSP cameras. 
-For picamera support Run ***sudo raspi-config***, Interface Options, then enable/disable Legacy Camera option and reboot.
-
-## RPI Quick curl Install or Upgrade   
-***IMPORTANT*** - A raspbian **sudo apt-get update** and **sudo apt-get upgrade** will **NOT** be performed as part of   
-**speed-install.sh** so it is highly recommended you run these prior to install
-to ensure your system is up-to-date.     
-
-#### Step 1
-Press GitHub copy icon on right side of code box below.     
-or With mouse left button highlight curl command in code box below. Right click mouse in **highlighted** area and select Copy.
-
-    curl -L https://raw.github.com/pageauc/speed-camera/master/speed-install.sh | bash
-
-#### Step 2
-On RPI putty SSH or terminal session right click, select paste then Enter to download and run script.  
-
-This will download and run the **speed-install.sh** script. If running under python3 you will need opencv3 installed if not installed.
-If you need to compile openCV see my Github Repo at [menu driven compile opencv3 from source](https://github.com/pageauc/opencv3-setup) project
-
-#### Ver 13.00 Notes
-Version 13.05 is a major speed camera revision. Camera thread code is now handled by a strmcam.py module.
-config.py variable names have changed so you will need to backup and cp config.py.new config.py (see below for details)    
-***IMPORTANT*** : All settings are in config.py.  You can delete configcam.py if it exists, once you upgrade to ver 13.05 or greater.
-plugins now work.  You can customize plugin files to suit you needs or create your own.  If you are upgrading you should delete, move
-old plugins so new ones will be downloaded during UPGRADE.  Please post GitHub issue if you find a bug or problem.  Claude 
-
-
-***IMPORTANT*** speed-cam.py ver 8.x or greater Requires Updated config.py and plugins.
-
-    cd ~/speed-camera
-    cp config.py config.py.bak
-    cp config.py.new config.py
-    
-To replace plugins rename (or delete) plugins folder per below
-
-    cd ~/speed-camera
-    mv plugins pluginsold   # renames plugins folder
-    rm -r plugins           # deletes plugins folder
-
-Then run ***menubox.sh*** UPGRADE menu pick.
-
-## Mac or Windows Systems
-See [Windows 10/11 or Apple Mac Docker Install Quick Start](https://github.com/pageauc/speed-camera#docker-install-quick-start)    
-or [Windows or Unix Distro Installs without Docker](https://github.com/pageauc/speed-camera#windows-or-non-rpi-unix-installs)
-
-## Program Description   
-This is a raspberry pi, Windows, Unix Distro computer openCV object speed camera demo program.
-It is written in python and uses openCV to detect and track the x,y coordinates of the 
-largest moving object in the camera view above a minimum pixel area.
-
-User variables are stored in the [***config.py***](https://github.com/pageauc/speed-camera/blob/master/config.py) file.
-Motion detection is restricted between ***MO_CROP_Y_UPPER***, ***MO_CROP_Y_LOWER***, ***MO_CROP_X_LEFT***, ***MO_CROP_X_RIGHT*** variables  (road or area of interest).
-***MO_CROP_AUTO_ON*** = ***True*** overrides manual settings and will Auto calculate a rough crop area based on image size.
-Motion Tracking is controlled by the ***MO_TRACK_EVENT_COUNT*** variable in config.py.  This sets the number of track events and 
-the track length in pixels.  This may need to be tuned for camera view, cpu speed, etc. 
-Speed is calculated based on ***CAL_OBJ_PX_*** and ***CAL_OBJ_MM_*** variables for L2R and R2L motion direction. A video stream frame image will be
-captured and saved in ***media/images*** dated subfolders (optional) per variable ***IM_SUBDIR_MAX_FILES*** = ***2000*** 
-For variable settings details see [config.py file](https://github.com/pageauc/speed-camera/blob/master/config.py). 
-
-If ***LOG_DATA_TO_CSV*** = ***True*** then a ***speed-cam.csv*** file will be created/updated with event data stored in
-CSV (Comma Separated Values) format. This can be imported into a spreadsheet, database, Etc program for further processing.
-Release 8.9 adds a **sqlite3** database to store speed data. Default is ***data/speed_cam.db*** with data in the ***speed*** table.
-Database setting can be managed from config.py.  Database is automatically created from config.py settings. For more
-details see [How to Manage Sqlite3 Database](https://github.com/pageauc/speed-camera/wiki/How-to-Manage-Sqlite3-Database)
-
-## Admin, Reports, Graphs and Utilities scripts
-  
-* [***menubox.sh***](https://github.com/pageauc/speed-camera/wiki/Admin-and-Settings#manage-settings-using-menuboxsh)
-script is a whiptail menu system to allow easier management of program settings and operation.    
-* [***run.sh***](https://github.com/pageauc/speed-camera/wiki/How-to-use-run.sh)
-This bash script uses supervisorctl to manage start, stop, status of speed-cam.py and webserver.py. Configured to autostart eg due to interruption of RTSP stream. 
-See conf files in supervisor folder for details. Note: you must run ***./run.sh*** ***install*** to initialize symbolic links to /etc/supervisor/conf.d folder. 
-Stop running any speed-cam and/or websever processes before running ***./run.sh*** ***start*** 
-* [***webserver.py***](https://github.com/pageauc/speed-camera/wiki/How-to-View-Data#how-to-view-images-and-or-data-from-a-web-browser)
-Allows viewing images and/or data from a web browser (see config.py for webserver settings)   
-* [***rclone***](https://github.com/pageauc/speed-camera/wiki/Manage-rclone-Remote-Storage-File-Transfer)
-Manage settings and setup for optional remote file sync to a remote storage service like google drive, DropBox and many others.   
-* [***watch-app.sh***](https://github.com/pageauc/speed-camera/wiki/watch-app.sh-Remote-Manage-Config)
-for administration of settings from a remote storage service. Plus application monitoring.  
-* [***sql-make-graph-count-totals.py***](https://github.com/pageauc/speed-camera/wiki/How-to-Generate-Speed-Camera-Graphs#sql-make-graph-count-totalspy) Query sqlite database and Generate one or more matplotlib graph images and save to media/graphs folder.
-Graphs display counts by hour, day or month for specfied previous days and speed over. Multiple reports can be managed from
-the config.py ***GRAPH_RUN_LIST*** variable under matplotlib image settings section.       
-* [***sql-make-graph-speed-ave.py***](https://github.com/pageauc/speed-camera/wiki/How-to-Generate-Speed-Camera-Graphs#sql-make-graph-speed-avepy) Query sqlite database and Generate one or more matplotlib graph images and save to media/graphs folder.
-Graphs display Average Speed by hour, day or month for specfied previous days and speed over. Multiple reports can be managed from
-the config.py ***GRAPH_RUN_LIST*** variable under matplotlib image settings section.    
-* [***sql-speed_gt.py***](https://github.com/pageauc/speed-camera/wiki/How-to-Generate-Speed-Camera-Graphs#sql-speed_gtpy) Query sqlite database and Generate html formatted report with links to images and save to media/reports folder.
-Can accept parameters or will prompt user if run from console with no parameters
-* [***makehtml.py***](https://github.com/pageauc/speed-camera/wiki/How-to-View-Data#view-combined-imagedata-html-pages-on-a-web-browser)
-Creates html files that combine csv and image data for easier viewing from a web browser and saved to media/html folder.    
-* [***speed-search.py***](https://github.com/pageauc/rpi-speed-camera/wiki/How-to-Run-speed-search.py)
-allows searching for similar target object images using opencv template matching.  Results save to media/search folder.    
-* [***alpr-speed.py***](https://github.com/pageauc/speed-camera/wiki/alpr-speed.py---Process-speed-images-with-OPENALPR-Automatic-License-Plate-Reader)
-This is a demo that processes existing speed camera images with a front or back view of vehicle using [OPENALPR](https://github.com/openalpr/openalpr)
-License plate reader. Output is saved to media/alpr folder. For installation, Settings and Run details see
-[ALPR Wiki Documentaion](https://github.com/pageauc/speed-camera/wiki/alpr-speed.py---Process-speed-images-with-OPENALPR-Automatic-License-Plate-Reader)       
-
-## Reference Links
-* YouTube Tutorial Video https://www.youtube.com/watch?v=n2WT3Qb0SIU
-* YouTube Speed Lapse Video https://youtu.be/-xdB_x_CbC8
-* YouTube Speed Camera Video https://youtu.be/eRi50BbJUro
-* YouTube motion-track video https://youtu.be/09JS7twPBsQ  
-* [How to Build a Cheap Homemade Speed Camera](https://mass.streetsblog.org/2021/02/26/how-to-build-a-homemade-speed-camera/)  
-* Speed Camera RPI Forum post https://www.raspberrypi.org/forums/viewtopic.php?p=1004150#p1004150
-* YouTube Channel https://www.youtube.com/user/pageaucp 
-* Speed Camera GitHub Repo https://github.com/pageauc/speed-camera      
-
-## Requirements
-[***Raspberry Pi computer***](https://www.raspberrypi.org/documentation/setup/) and a [***RPI camera module installed***](https://www.raspberrypi.org/documentation/usage/camera/)
-or USB Camera plugged in. Make sure hardware is tested and works. Most [RPI models](https://www.raspberrypi.org/products/) will work OK. 
-A quad core RPI will greatly improve performance due to threading. A recent version of 
-[Raspbian operating system](https://www.raspberrypi.org/downloads/raspbian/) is Recommended.   
-or  
-***MS Windows or Unix distro*** computer with a USB Web Camera plugged in and a
-[recent version of python installed](https://www.python.org/downloads/)
-For Details See [***Wiki details***](https://github.com/pageauc/speed-camera/wiki/Prerequisites-and-Install#windows-or-non-rpi-unix-installs).
-
-It is recommended you upgrade to OpenCV version 3.x.x  For Easy compile of opencv 3.4.2 from source 
-See https://github.com/pageauc/opencv3-setup
-
-## Windows or Non RPI Unix Installs
-For Windows or Unix computer platforms (non RPI or Debian) ensure you have the most
-up-to-date python version. For Download and Install [python](https://www.python.org/downloads) and [Opencv](https://docs.opencv.org/4.x/d5/de5/tutorial_py_setup_in_windows.html)    
-
-The latest python versions includes numpy and recent opencv version that is required to run this code. 
-You will also need a USB web cam installed and working. 
-To install this program access the GitHub project page at https://github.com/pageauc/speed-camera
-Select the ***green Clone or download*** button. The files will be cloned or zipped
-to a speed-camera folder. You can run the code from python IDLE application (recommended), GUI desktop
-or command prompt terminal window. Note bash .sh shell scripts will not work with windows unless 
-special support for bash is installed for windows Eg http://win-bash.sourceforge.net/  http://www.cygwin.com/
-***Note:*** I have Not tested these.   
-
-## Docker Install Quick Start
-speed camera supports a docker installation on    
-Apple Macintosh per [System requirements and Instructions](https://docs.docker.com/desktop/mac/install/)    
-and      
-Microsoft Windows 10/11 64 bit with BIOS Virtualization enabled
-and [Microsoft Windows Subsystem for Linux WSL 2](https://docs.microsoft.com/en-us/windows/wsl/install) 
-per [System requirements and Instructions](https://docs.docker.com/desktop/windows/install/).   
-
-1. Download and install [Docker Desktop](https://www.docker.com/get-started) for your System
-1. Clone the GitHub [Speed Camera repository](https://github.com/pageauc/speed-camera) using green Clone button (top right)
-1. Run [docker-compose up](https://docs.docker.com/compose/reference/up/) from the directory you cloned the repo into.
-1. The Docker container will likely exit because it is using a default config.
-1. Edit the configuration file @ `config/config.py`
-1. Run [docker-compose up](https://docs.docker.com/compose/reference/up/) per documentation
-1. Run [docker build](https://docs.docker.com/engine/reference/commandline/build/) command locally to get a fresh image.
- 
-## Raspberry pi Manual Install or Upgrade   
-From logged in RPI SSH session or console terminal perform the following. Allows you to review install code before running
-
-    cd ~
-    wget https://raw.github.com/pageauc/speed-camera/master/speed-install.sh
-    more speed-install.sh       # You can review code if you wish
-    chmod +x speed-install.sh
-    ./speed-install.sh  # runs install script.
-    
-## Run to view verbose logging 
-
-    cd ~/speed-camera    
-    ./speed-cam.py
-    
-See [***How to Run***](https://github.com/pageauc/speed-camera/wiki/How-to-Run) speed-cam.py wiki section
-
-***IMPORTANT*** Speed Camera will start in ***CALIBRATE_ON*** = ***True*** Mode.    
-Review settings in ***config.py*** file and edit variables with nano as required.
-You will need to perform a calibration to set the correct value for config.py ***CAL_OBJ_PX_*** and ***CAL_OBJ_MM_*** for
-L2R and R2L directions. The variables are based on the distance from camera to objects being measured for speed.
-See [***Calibration Procedure***](https://github.com/pageauc/speed-camera/wiki/Calibrate-Camera-for-Distance) for more details.     
-
-The config.py motion tracking variable called ***track_counter*** = can be adjusted for your system and opencv version.
-Default is 5 but a quad core RPI3 and latest opencv version eg 3.4.2 can be 10-15 or possibly greater.  This will
-require monitoring the verbose log messages in order to fine tune.
-    
-## Run menubox.sh 
-
-    cd ~/speed-camera
-    ./menubox.sh
-
-Admin speed-cam Easier using menubox.sh (Once calibrated and/or testing complete)  
-![menubox main menu](https://github.com/pageauc/speed-camera/blob/master/menubox.png)     
-
-View speed-cam data and trends from web browser per sample screen shots. These can be generated 
-from Menubox.sh menu pick or by running scripts from console or via crontab schedule.
-
-![Speed Camera GRAPHS Folder Web Page](https://github.com/pageauc/speed-camera/blob/master/speed_web_graphs.png)  
-![Speed Camera REPORTS Folder Web Page](https://github.com/pageauc/speed-camera/blob/master/speed_web_reports.png)   
-![Speed Camera HTML Folder Web Page](https://github.com/pageauc/speed-camera/blob/master/speed_web_html.png)    
-
-You can view recent or historical images directly from the speed web browser page.  These are dynamically created
-and show up-to-date images.  Press the web page refresh button to update display 
-![Speed Camera RECENT Folder Web Page](https://github.com/pageauc/speed-camera/blob/master/speed_web_recent.png)   
-![Speed Camera IMAGES Folder Web Page](https://github.com/pageauc/speed-camera/blob/master/speed_web_images.png)   
-
-## Credits  
-Some of this code is based on a YouTube tutorial by
-Kyle Hounslow using C here https://www.youtube.com/watch?v=X6rPdRZzgjg
-
-Thanks to Adrian Rosebrock jrosebr1 at http://www.pyimagesearch.com 
-for the PiVideoStream Class code available on github at
-https://github.com/jrosebr1/imutils/blob/master/imutils/video/pivideostream.py
-  
-Have Fun   
-Claude Pageau    
-YouTube Channel https://www.youtube.com/user/pageaucp   
-GitHub Repo https://github.com/pageauc
+<div class="Box-sc-g0xbh4-0 QkQOb js-snippet-clipboard-copy-unpositioned" data-hpc="true"><article class="markdown-body entry-content container-lg" itemprop="text"><div class="markdown-heading" dir="auto"><h1 tabindex="-1" class="heading-element" dir="auto"><font _mstmutation="1" _msttexthash="58153537" _msthash="351">SPEED CAMERA - 物体运动跟踪器</font><a href="https://github.com/thibmaek/awesome-raspberry-pi"><img src="https://camo.githubusercontent.com/d8b2bde4796b67266f07c7a619f554c926ca4750d5d8861b4b740baaddc3fd1e/68747470733a2f2f617765736f6d652e72652f6d656e74696f6e65642d62616467652e737667" alt="在 Awesome <INSERT LIST NAME> 中提及" data-canonical-src="https://awesome.re/mentioned-badge.svg" style="max-width: 100%;" _mstalt="1167491" _msthash="350"></a></h1><a id="user-content-speed-camera---object-motion-tracker-" class="anchor" aria-label="永久链接： SPEED CAMERA - 对象运动跟踪器" href="#speed-camera---object-motion-tracker-" _mstaria-label="1354392" _msthash="352"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto" _msttexthash="168704796" _msthash="353">RPI、Unix 和 Windows 测速相机使用 python、openCV、RPI 相机模块、USB Cam 或 IP Cam</h3><a id="user-content-rpi-unix-and-windows-speed-camera-using-python-opencv-rpi-camera-module-usb-cam-or-ip-cam" class="anchor" aria-label="永久链接：RPI、Unix 和 Windows 测速相机使用 python、openCV、RPI 相机模块、USB Cam 或 IP Cam" href="#rpi-unix-and-windows-speed-camera-using-python-opencv-rpi-camera-module-usb-cam-or-ip-cam" _mstaria-label="5395663" _msthash="354"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="150156994" _msthash="355">有关详细信息，请参阅<a href="https://github.com/pageauc/speed-camera/wiki/Program-Description#program-features" _istranslated="1">程序功能</a>、<a href="https://github.com/pageauc/speed-camera/wiki" _istranslated="1">Wiki 说明</a>和 <a href="https://github.com/pageauc/speed-camera#reference-links" _istranslated="1">YouTube 视频</a>。</h2><a id="user-content-for-details-see-program-features-wiki-instructions-and-youtube-videos" class="anchor" aria-label="永久链接：有关详细信息，请参阅程序功能、Wiki 说明和 YouTube 视频。" href="#for-details-see-program-features-wiki-instructions-and-youtube-videos" _mstaria-label="4035694" _msthash="356"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="43553679" _msthash="357">关于 Bullseye 的注释：</h2><a id="user-content-note-re-bullseye" class="anchor" aria-label="永久链接：Note re Bullseye：" href="#note-re-bullseye" _mstaria-label="618189" _msthash="358"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto" _msttexthash="2128817535" _msthash="359">Speed-cam.py 版本 11.26 及更高版本现在将在 Raspberry Pi OS Bullseye 或更高版本下运行，带有 pi 摄像头模块以及 usbcam 和 IP/RTSP 摄像头。
+对于 picamera 支持，请运行 <em _istranslated="1"><strong _istranslated="1">sudo raspi-config</strong></em>、界面选项，然后启用/禁用 Legacy Camera 选项并重新启动。</p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="37736348" _msthash="360">RPI Quick curl 安装或升级</h2><a id="user-content-rpi-quick-curl-install-or-upgrade" class="anchor" aria-label="永久链接：RPI Quick curl 安装或升级" href="#rpi-quick-curl-install-or-upgrade" _mstaria-label="1288664" _msthash="361"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto" _msttexthash="1218704097" _msthash="362"><em _istranslated="1"><strong _istranslated="1">重要</strong></em> - raspbian <strong _istranslated="1">sudo apt-get update</strong> 和 <strong _istranslated="1">sudo apt-get upgrade</strong> <strong _istranslated="1">不会</strong>作为<br _istranslated="1"> <strong _istranslated="1">speed-install.sh</strong> 的一部分执行，因此强烈建议您在安装之前运行它们
+以确保您的系统是最新的。</p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto" _msttexthash="6091189" _msthash="363">第 1 步</h4><a id="user-content-step-1" class="anchor" aria-label="永久链接：步骤 1" href="#step-1" _mstaria-label="259636" _msthash="364"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto" _msttexthash="809301350" _msthash="365">按下面代码框右侧的 GitHub 复制图标。<br _istranslated="1">或下面的代码框中的 With mouse left button highlight curl 命令。在<strong _istranslated="1">突出显示</strong>的区域右键单击鼠标，然后选择 Copy 。</p>
+<div class="snippet-clipboard-content notranslate position-relative overflow-auto"><pre class="notranslate"><code>curl -L https://raw.github.com/pageauc/speed-camera/master/speed-install.sh | bash
+</code></pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="curl -L https://raw.github.com/pageauc/speed-camera/master/speed-install.sh | bash" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto" _msttexthash="6624865" _msthash="366">步骤 2</h4><a id="user-content-step-2" class="anchor" aria-label="永久链接：步骤 2" href="#step-2" _mstaria-label="259909" _msthash="367"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto" _msttexthash="396284226" _msthash="368">在 RPI putty SSH 或终端会话上右键单击，选择粘贴，然后选择 Enter以下载并运行脚本。</p>
+<p dir="auto" _msttexthash="1169555816" _msthash="369">这将下载并运行 <strong _istranslated="1">speed-install.sh</strong> 脚本。如果在 python3 下运行，则需要安装 opencv3（如果未安装）。
+如果你需要编译 openCV，请参阅我的 Github Repo 菜单<a href="https://github.com/pageauc/opencv3-setup" _istranslated="1">驱动编译 opencv3 from source</a> project</p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto" _msttexthash="13268931" _msthash="370">Ver 13.00 注释</h4><a id="user-content-ver-1300-notes" class="anchor" aria-label="永久链接： Ver 13.00 Notes" href="#ver-1300-notes" _mstaria-label="470353" _msthash="371"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto" _msttexthash="10105498533" _msthash="372">版本 13.05 是测速摄像头的主要修订版。摄像机线程代码现在由 strmcam.py 模块处理。
+config.py 变量名称已更改，因此您需要备份并 cp config.py.new config.py（有关详细信息，请参阅下文）<br _istranslated="1"> <em _istranslated="1"><strong _istranslated="1">重要</strong></em>：所有设置均 config.py。升级到 13.05 版或更高版本后，您可以删除 configcam.py（如果存在）。
+插件现在可以工作了。您可以自定义插件文件以满足您的需要或创建自己的插件文件。如果要升级，您应该删除、移动
+旧插件，因此在 UPGRADE 期间将下载新插件。如果您发现错误或问题，请发布 GitHub 问题。克劳德</p>
+<p dir="auto" _msttexthash="191656855" _msthash="373"><em _istranslated="1"><strong _istranslated="1">重要</strong></em> speed-cam.py 版本 8.x 或更高版本需要更新的 config.py 和插件。</p>
+<div class="snippet-clipboard-content notranslate position-relative overflow-auto"><pre class="notranslate"><code>cd ~/speed-camera
+cp config.py config.py.bak
+cp config.py.new config.py
+</code></pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="cd ~/speed-camera
+cp config.py config.py.bak
+cp config.py.new config.py" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto" _msttexthash="150679997" _msthash="374">要替换插件，请重命名（或删除）以下插件文件夹</p>
+<div class="snippet-clipboard-content notranslate position-relative overflow-auto"><pre class="notranslate"><code>cd ~/speed-camera
+mv plugins pluginsold   # renames plugins folder
+rm -r plugins           # deletes plugins folder
+</code></pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="cd ~/speed-camera
+mv plugins pluginsold   # renames plugins folder
+rm -r plugins           # deletes plugins folder" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto" _msttexthash="47892780" _msthash="375">然后运行 UPGRADE 菜单选取 <em _istranslated="1"><strong _istranslated="1">menubox.sh</strong></em>。</p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="18939544" _msthash="376">Mac 或 Windows 系统</h2><a id="user-content-mac-or-windows-systems" class="anchor" aria-label="永久链接：Mac 或 Windows 系统" href="#mac-or-windows-systems" _mstaria-label="832013" _msthash="377"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto" _msttexthash="263278223" _msthash="378">请参阅 <a href="https://github.com/pageauc/speed-camera#docker-install-quick-start" _istranslated="1">Windows 10/11 或 Apple Mac Docker 安装快速入门</a><br _istranslated="1">或<a href="https://github.com/pageauc/speed-camera#windows-or-non-rpi-unix-installs" _istranslated="1">不使用 Docker 的 Windows 或 Unix Distro 安装</a></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="13217542" _msthash="379">计划描述</h2><a id="user-content-program-description" class="anchor" aria-label="永久链接： 程序描述" href="#program-description" _mstaria-label="775801" _msthash="380"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto" _msttexthash="1530914008" _msthash="381">这是一个 raspberry pi、Windows、Unix Distro 计算机 openCV 对象测速相机演示程序。
+它是用 python 编写的，并使用 openCV 来检测和跟踪
+摄像机视图中位于最小像素区域上方的最大移动对象。</p>
+<p dir="auto" _msttexthash="16195860707" _msthash="382">用户变量存储在 <a href="https://github.com/pageauc/speed-camera/blob/master/config.py" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">config.py</strong></em></a> 文件中。
+运动检测限制在 <em _istranslated="1"><strong _istranslated="1">MO_CROP_Y_UPPER</strong></em>、<em _istranslated="1"><strong _istranslated="1">MO_CROP_Y_LOWER</strong></em>、<em _istranslated="1"><strong _istranslated="1">MO_CROP_X_LEFT</strong></em> <em _istranslated="1"><strong _istranslated="1">MO_CROP_X_RIGHT</strong></em> 变量（道路或感兴趣区域）之间。<em _istranslated="1"><strong _istranslated="1">MO_CROP_AUTO_ON</strong></em> = <em _istranslated="1"><strong _istranslated="1">True</strong></em> 将覆盖手动设置，并将根据图像大小自动计算粗略的裁剪区域。
+Motion Tracking 由 <em _istranslated="1"><strong _istranslated="1">config.py 中的 MO_TRACK_EVENT_COUNT</strong></em> 变量控制。这将设置跟踪事件的数量，并且
+轨道长度（以像素为单位）。这可能需要针对摄像机视图、CPU 速度等进行调整。
+速度是根据 L2R 和 R2L 运动方向的 <em _istranslated="1"><strong _istranslated="1">CAL_OBJ_PX_</strong></em> 和 <em _istranslated="1"><strong _istranslated="1">CAL_OBJ_MM_</strong></em> 变量计算的。视频流帧图像将为
+捕获并保存在媒体<em _istranslated="1"><strong _istranslated="1">/图像</strong></em>日期为日期的子文件夹（可选）中，每个变量 <em _istranslated="1"><strong _istranslated="1">IM_SUBDIR_MAX_FILES</strong></em> = <em _istranslated="1"><strong _istranslated="1">2000</strong></em>有关变量设置的详细信息<a href="https://github.com/pageauc/speed-camera/blob/master/config.py" _istranslated="1">，请参阅 config.py 文件</a>。</p>
+<p dir="auto" _msttexthash="5496457460" _msthash="383">如果 <em _istranslated="1"><strong _istranslated="1">LOG_DATA_TO_CSV</strong></em> = <em _istranslated="1"><strong _istranslated="1">True</strong></em>，则将使用存储在 中的 事件数据创建/更新 <em _istranslated="1"><strong _istranslated="1">speed-cam.csv</strong></em> 文件
+CSV（逗号分隔值）格式。这可以导入到电子表格、数据库等程序中进行进一步处理。
+版本 8.9 添加了一个 <strong _istranslated="1">sqlite3</strong> 数据库来存储速度数据。默认值为 <em _istranslated="1"><strong _istranslated="1">data/speed_cam.db</strong></em> 数据在 <em _istranslated="1"><strong _istranslated="1">speed</strong></em> 表中。
+可通过 config.py 管理数据库设置。数据库是根据 config.py 设置自动创建的。了解更多
+详细信息请参见<a href="https://github.com/pageauc/speed-camera/wiki/How-to-Manage-Sqlite3-Database" _istranslated="1">如何管理 Sqlite3 数据库</a></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="77333828" _msthash="384">管理员、报表、图形和实用程序脚本</h2><a id="user-content-admin-reports-graphs-and-utilities-scripts" class="anchor" aria-label="永久链接：管理、报告、图表和实用程序脚本" href="#admin-reports-graphs-and-utilities-scripts" _mstaria-label="2046902" _msthash="385"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<ul dir="auto">
+<li _msttexthash="339083459" _msthash="386"><a href="https://github.com/pageauc/speed-camera/wiki/Admin-and-Settings#manage-settings-using-menuboxsh" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">menubox.sh</strong></em></a> 脚本是一个 whiptail 菜单系统，可以更轻松地管理程序设置和操作。</li>
+<li _msttexthash="3648639085" _msthash="387"><a href="https://github.com/pageauc/speed-camera/wiki/How-to-use-run.sh" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">run.sh</strong></em></a>此 bash 脚本使用 supervisorctl 来管理 speed-cam.py 的启动、停止、状态和 webserver.py。配置为由于 RTSP 流中断而自动启动。
+有关详细信息，请参阅 supervisor 文件夹中的 conf 文件。注意：您必须运行 <em _istranslated="1"><strong _istranslated="1">./run.sh</strong></em> <em _istranslated="1"><strong _istranslated="1">install</strong></em> 来初始化指向 /etc/supervisor/conf.d 文件夹的符号链接。
+在运行 <em _istranslated="1"><strong _istranslated="1">./run.sh</strong></em> <em _istranslated="1"><strong _istranslated="1">start</strong></em> 之前停止运行任何 speed-cam 和/或 websever 进程</li>
+<li _msttexthash="401774100" _msthash="388"><a href="https://github.com/pageauc/speed-camera/wiki/How-to-View-Data#how-to-view-images-and-or-data-from-a-web-browser" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">webserver.py</strong></em></a>允许从 Web 浏览器查看图像和/或数据（请参阅 config.py 了解 Web 服务器设置）</li>
+<li _msttexthash="338368862" _msthash="389"><a href="https://github.com/pageauc/speed-camera/wiki/Manage-rclone-Remote-Storage-File-Transfer" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">克隆</strong></em></a>管理可选远程文件同步到远程存储服务（如 google drive、DropBox 等）的设置和设置。</li>
+<li _msttexthash="228663773" _msthash="390"><a href="https://github.com/pageauc/speed-camera/wiki/watch-app.sh-Remote-Manage-Config" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">watch-app.sh</strong></em></a> 用于从远程存储服务管理设置。加上应用程序监控。</li>
+<li _msttexthash="1720164342" _msthash="391"><a href="https://github.com/pageauc/speed-camera/wiki/How-to-Generate-Speed-Camera-Graphs#sql-make-graph-count-totalspy" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">sql-make-graph-count-totals.py</strong></em></a>查询 sqlite 数据库并生成一个或多个 matplotlib 图形图像并保存到 media/graphs 文件夹。
+图表按小时、天或月显示指定前几天的计数，并加快速度。可以从
+config.py <em _istranslated="1"><strong _istranslated="1">GRAPH_RUN_LIST</strong></em> 在 Matplotlib Image Settings 部分下。</li>
+<li _msttexthash="1798944277" _msthash="392"><a href="https://github.com/pageauc/speed-camera/wiki/How-to-Generate-Speed-Camera-Graphs#sql-make-graph-speed-avepy" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">sql-make-graph-speed-ave.py</strong></em></a>查询 sqlite 数据库并生成一个或多个 matplotlib 图形图像并保存到 media/graphs 文件夹。
+图表按小时、天或月显示指定前几天的平均速度，并按时间显示。可以从
+config.py <em _istranslated="1"><strong _istranslated="1">GRAPH_RUN_LIST</strong></em> 在 Matplotlib Image Settings 部分下。</li>
+<li _msttexthash="1285175814" _msthash="393"><a href="https://github.com/pageauc/speed-camera/wiki/How-to-Generate-Speed-Camera-Graphs#sql-speed_gtpy" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">sql-speed_gt.py</strong></em></a>查询 sqlite 数据库并生成带有图像链接的 html 格式报告并保存到 media/reports 文件夹。
+可以接受参数，或者如果从不带参数的控制台运行，则会提示用户</li>
+<li _msttexthash="449807215" _msthash="394"><a href="https://github.com/pageauc/speed-camera/wiki/How-to-View-Data#view-combined-imagedata-html-pages-on-a-web-browser" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">makehtml.py</strong></em></a>创建合并 csv 和图像数据的 html 文件，以便更轻松地从 Web 浏览器查看并保存到 media/html 文件夹。</li>
+<li _msttexthash="399964110" _msthash="395"><a href="https://github.com/pageauc/rpi-speed-camera/wiki/How-to-Run-speed-search.py" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">speed-search.py</strong></em></a> 允许使用 OpenCV 模板匹配搜索类似的目标对象图像。结果保存到 media/search 文件夹。</li>
+<li _msttexthash="1619497724" _msthash="396"><a href="https://github.com/pageauc/speed-camera/wiki/alpr-speed.py---Process-speed-images-with-OPENALPR-Automatic-License-Plate-Reader" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">alpr-speed.py</strong></em></a>这是一个演示，它使用 <a href="https://github.com/openalpr/openalpr" _istranslated="1">OPENALPR</a> 车牌读取器处理具有车辆前视图或后视图的现有测速摄像头图像。输出保存到 media/alpr 文件夹。有关安装、设置和运行的详细信息，请参阅 <a href="https://github.com/pageauc/speed-camera/wiki/alpr-speed.py---Process-speed-images-with-OPENALPR-Automatic-License-Plate-Reader" _istranslated="1">ALPR Wiki 文档</a></li>
+</ul>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="13138190" _msthash="397">参考链接</h2><a id="user-content-reference-links" class="anchor" aria-label="永久链接：参考链接" href="#reference-links" _mstaria-label="584298" _msthash="398"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<ul dir="auto">
+<li _msttexthash="28818465" _msthash="399">YouTube 教程视频 <a href="https://www.youtube.com/watch?v=n2WT3Qb0SIU" rel="nofollow" _istranslated="1">https://www.youtube.com/watch?v=n2WT3Qb0SIU</a></li>
+<li _msttexthash="28526537" _msthash="400">YouTube 速延视频 <a href="https://youtu.be/-xdB_x_CbC8" rel="nofollow" _istranslated="1">https://youtu.be/-xdB_x_CbC8</a></li>
+<li _msttexthash="43540055" _msthash="401">YouTube 测速相机视频 <a href="https://youtu.be/eRi50BbJUro" rel="nofollow" _istranslated="1">https://youtu.be/eRi50BbJUro</a></li>
+<li _msttexthash="26327288" _msthash="402">YouTube Motion Track 视频 <a href="https://youtu.be/09JS7twPBsQ" rel="nofollow" _istranslated="1">https://youtu.be/09JS7twPBsQ</a></li>
+<li><a href="https://mass.streetsblog.org/2021/02/26/how-to-build-a-homemade-speed-camera/" rel="nofollow" _msttexthash="59948226" _msthash="403">如何构建便宜的自制测速相机</a></li>
+<li _msttexthash="41532660" _msthash="404">测速摄像头 RPI 论坛帖子 <a href="https://www.raspberrypi.org/forums/viewtopic.php?p=1004150#p1004150" rel="nofollow" _istranslated="1">https://www.raspberrypi.org/forums/viewtopic.php?p=1004150#p1004150</a></li>
+<li _msttexthash="16022370" _msthash="405">YouTube 频道 <a href="https://www.youtube.com/user/pageaucp" rel="nofollow" _istranslated="1">https://www.youtube.com/user/pageaucp</a></li>
+<li _msttexthash="34263541" _msthash="406">测速摄像头 GitHub 存储库 <a href="https://github.com/pageauc/speed-camera" _istranslated="1">https://github.com/pageauc/speed-camera</a></li>
+</ul>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="6085547" _msthash="407">要求</h2><a id="user-content-requirements" class="anchor" aria-label="永久链接： 要求" href="#requirements" _mstaria-label="524849" _msthash="408"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto" _msttexthash="3962705773" _msthash="409">已安装 <a href="https://www.raspberrypi.org/documentation/setup/" rel="nofollow" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">Raspberry Pi 计算机</strong></em></a>和 <a href="https://www.raspberrypi.org/documentation/usage/camera/" rel="nofollow" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">RPI 摄像头模块</strong></em></a>或插入 USB 摄像头。确保硬件经过测试并正常工作。大多数 <a href="https://www.raspberrypi.org/products/" rel="nofollow" _istranslated="1">RPI 模型</a>都可以正常工作。
+由于线程化，四核 RPI 将大大提高性能。建议使用最新版本的 <a href="https://www.raspberrypi.org/downloads/raspbian/" rel="nofollow" _istranslated="1">Raspbian 操作系统</a>。<br _istranslated="1">或<br _istranslated="1"> <em _istranslated="1"><strong _istranslated="1">MS Windows 或 Unix 发行版</strong></em>计算机，插入了 USB 网络摄像头并<a href="https://www.python.org/downloads/" rel="nofollow" _istranslated="1">安装了最新版本的 python</a> 有关详细信息，请参阅 <a href="https://github.com/pageauc/speed-camera/wiki/Prerequisites-and-Install#windows-or-non-rpi-unix-installs" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">Wiki 详细信息</strong></em></a>。</p>
+<p dir="auto" _msttexthash="208986141" _msthash="410">建议您升级到 OpenCV 版本 3.x.x，以便从源代码轻松编译 opencv 3.4.2
+查看 <a href="https://github.com/pageauc/opencv3-setup" _istranslated="1">https://github.com/pageauc/opencv3-setup</a></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="30319770" _msthash="411">Windows 或非 RPI Unix 安装</h2><a id="user-content-windows-or-non-rpi-unix-installs" class="anchor" aria-label="永久链接：Windows 或非 RPI Unix 安装" href="#windows-or-non-rpi-unix-installs" _mstaria-label="1228487" _msthash="412"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto" _msttexthash="517607129" _msthash="413">对于 Windows 或 Unix 计算机平台（非 RPI 或 Debian），确保您拥有最多的
+最新的 Python 版本。下载并安装 <a href="https://www.python.org/downloads" rel="nofollow" _istranslated="1">python</a> 和 <a href="https://docs.opencv.org/4.x/d5/de5/tutorial_py_setup_in_windows.html" rel="nofollow" _istranslated="1">Opencv</a></p>
+<p dir="auto" _msttexthash="8879140998" _msthash="414">最新的 python 版本包括运行此代码所需的 numpy 和最新的 opencv 版本。
+您还需要安装并工作 USB 网络摄像头。
+要安装此程序，请访问 GitHub 项目页面，网址为 <a href="https://github.com/pageauc/speed-camera" _istranslated="1">https://github.com/pageauc/speed-camera</a> 选择<em _istranslated="1"><strong _istranslated="1">绿色的 Clone or download</strong></em> 按钮。文件将被克隆或压缩
+移动到测速相机文件夹。您可以从 python IDLE 应用程序（推荐）、GUI 桌面运行代码
+或命令提示符终端窗口。注意 bash .sh shell 脚本不适用于 Windows，除非
+为 Windows 安装了对 bash 的特殊支持，例如 <a href="http://win-bash.sourceforge.net/" rel="nofollow" _istranslated="1">http://win-bash.sourceforge.net/</a> <a href="http://www.cygwin.com/" rel="nofollow" _istranslated="1">http://www.cygwin.com/</a> <em _istranslated="1"><strong _istranslated="1">注意：</strong></em>我还没有测试过这些。</p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="36455341" _msthash="415">Docker 安装快速入门</h2><a id="user-content-docker-install-quick-start" class="anchor" aria-label="永久链接：Docker Install Quick Start" href="#docker-install-quick-start" _mstaria-label="1012986" _msthash="416"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto" _msttexthash="1645288502" _msthash="417">测速摄像头支持根据<a href="https://docs.docker.com/desktop/mac/install/" rel="nofollow" _istranslated="1">系统要求和说明</a><br _istranslated="1">在 Apple Macintosh 上安装<br _istranslated="1"> docker，并支持<br _istranslated="1">在启用 BIOS 虚拟化的情况下在 Microsoft Windows 10/11 64 位上安装 Docker
+以及<a href="https://docs.microsoft.com/en-us/windows/wsl/install" rel="nofollow" _istranslated="1">适用于 Linux WSL 2 的 Microsoft Windows 子系统</a>（根据<a href="https://docs.docker.com/desktop/windows/install/" rel="nofollow" _istranslated="1">系统要求和说明</a>）。</p>
+<ol dir="auto">
+<li _msttexthash="42729414" _msthash="418">为您的系统下载并安装 <a href="https://www.docker.com/get-started" rel="nofollow" _istranslated="1">Docker Desktop</a></li>
+<li _msttexthash="214225817" _msthash="419">使用绿色的 Clone （克隆） 按钮（右上角）克隆 GitHub <a href="https://github.com/pageauc/speed-camera" _istranslated="1">Speed Camera 存储库</a></li>
+<li _msttexthash="67982694" _msthash="420">从将存储库克隆到的目录运行 <a href="https://docs.docker.com/compose/reference/up/" rel="nofollow" _istranslated="1">docker-compose up</a>。</li>
+<li _msttexthash="169770900" _msthash="421">Docker 容器可能会退出，因为它使用的是默认配置。</li>
+<li><font _mstmutation="1" _msttexthash="22256728" _msthash="422">编辑配置文件 @</font><code>config/config.py</code></li>
+<li _msttexthash="22745424" _msthash="423">根据文档运行 <a href="https://docs.docker.com/compose/reference/up/" rel="nofollow" _istranslated="1">docker-compose up</a></li>
+<li _msttexthash="85950722" _msthash="424">在本地运行 <a href="https://docs.docker.com/engine/reference/commandline/build/" rel="nofollow" _istranslated="1">docker build</a> command 以获取新映像。</li>
+</ol>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="50623053" _msthash="425">Raspberry pi 手动安装或升级</h2><a id="user-content-raspberry-pi-manual-install-or-upgrade" class="anchor" aria-label="永久链接：Raspberry Pi 手动安装或升级" href="#raspberry-pi-manual-install-or-upgrade" _mstaria-label="1623895" _msthash="426"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto" _msttexthash="317568680" _msthash="427">从登录的 RPI SSH 会话或控制台终端执行以下操作。允许您在运行之前查看安装代码</p>
+<div class="snippet-clipboard-content notranslate position-relative overflow-auto"><pre class="notranslate"><code>cd ~
+wget https://raw.github.com/pageauc/speed-camera/master/speed-install.sh
+more speed-install.sh       # You can review code if you wish
+chmod +x speed-install.sh
+./speed-install.sh  # runs install script.
+</code></pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="cd ~
+wget https://raw.github.com/pageauc/speed-camera/master/speed-install.sh
+more speed-install.sh       # You can review code if you wish
+chmod +x speed-install.sh
+./speed-install.sh  # runs install script." tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="46978360" _msthash="428">Run 以查看详细日志记录</h2><a id="user-content-run-to-view-verbose-logging" class="anchor" aria-label="永久链接：Run to view verbose logging" href="#run-to-view-verbose-logging" _mstaria-label="1048125" _msthash="429"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<div class="snippet-clipboard-content notranslate position-relative overflow-auto"><pre class="notranslate"><code>cd ~/speed-camera    
+./speed-cam.py
+</code></pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="cd ~/speed-camera    
+./speed-cam.py" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto" _msttexthash="50884301" _msthash="430">请参阅<a href="https://github.com/pageauc/speed-camera/wiki/How-to-Run" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">如何运行</strong></em></a> speed-cam.py wiki 部分</p>
+<p dir="auto" _msttexthash="3456723465" _msthash="431"><em _istranslated="1"><strong _istranslated="1">重要</strong></em>测速相机将在 <em _istranslated="1"><strong _istranslated="1">CALIBRATE_ON</strong></em> = <em _istranslated="1"><strong _istranslated="1">True</strong></em> 模式下启动。<br _istranslated="1">查看 <em _istranslated="1"><strong _istranslated="1">config.py</strong></em> 文件中的设置，并根据需要使用 nano 编辑变量。
+您需要执行校准，以便为 <em _istranslated="1"><strong _istranslated="1">config.py CAL_OBJ_PX_</strong></em> 设置正确的值，并为 <em _istranslated="1"><strong _istranslated="1">CAL_OBJ_MM_</strong></em> 设置
+L2R 和 R2L 方向。这些变量基于从摄像机到被测速物体的距离。
+有关详细信息<a href="https://github.com/pageauc/speed-camera/wiki/Calibrate-Camera-for-Distance" _istranslated="1"><em _istranslated="1"><strong _istranslated="1">，请参阅校准程序</strong></em></a>。</p>
+<p dir="auto" _msttexthash="2118240163" _msthash="432">名为 <em _istranslated="1"><strong _istranslated="1">track_counter</strong></em> = 的 config.py 运动跟踪变量可以针对您的系统和 opencv 版本进行调整。
+默认值为 5，但四核 RPI3 和最新的 opencv 版本（例如 3.4.2）可以是 10-15 或可能更高。这将
+需要监控详细的日志消息以进行微调。</p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="7158372" _msthash="433">运行 menubox.sh</h2><a id="user-content-run-menuboxsh" class="anchor" aria-label="永久链接：运行 menubox.sh" href="#run-menuboxsh" _mstaria-label="546156" _msthash="434"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<div class="snippet-clipboard-content notranslate position-relative overflow-auto"><pre class="notranslate"><code>cd ~/speed-camera
+./menubox.sh
+</code></pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="cd ~/speed-camera
+./menubox.sh" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font _mstmutation="1" _msttexthash="243994452" _msthash="436">管理员 speed-cam 使用 menubox.sh 更轻松（校准和/或测试完成后）</font><br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/pageauc/speed-camera/blob/master/menubox.png"><img src="https://github.com/pageauc/speed-camera/raw/master/menubox.png" alt="menubox 主菜单" style="max-width: 100%;" _mstalt="296010" _msthash="435"></a></p>
+<p dir="auto" _msttexthash="751344048" _msthash="437">根据示例屏幕截图从 Web 浏览器查看测速摄像头数据和趋势。这些可以生成
+从 Menubox.sh 菜单中选择或通过控制台运行脚本或通过 crontab 计划。</p>
+<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="https://github.com/pageauc/speed-camera/blob/master/speed_web_graphs.png"><img src="https://github.com/pageauc/speed-camera/raw/master/speed_web_graphs.png" alt="测速摄像头 GRAPHS 文件夹网页" style="max-width: 100%;" _mstalt="786981" _msthash="438"></a><br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/pageauc/speed-camera/blob/master/speed_web_reports.png"><img src="https://github.com/pageauc/speed-camera/raw/master/speed_web_reports.png" alt="测速摄像头 REPORTS 文件夹网页" style="max-width: 100%;" _mstalt="835549" _msthash="439"></a><br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/pageauc/speed-camera/blob/master/speed_web_html.png"><img src="https://github.com/pageauc/speed-camera/raw/master/speed_web_html.png" alt="测速相机 HTML 文件夹网页" style="max-width: 100%;" _mstalt="711282" _msthash="440"></a></p>
+<p dir="auto"><font _mstmutation="1" _msttexthash="679370835" _msthash="443">您可以直接从 speed Web 浏览器页面查看最近的或历史的图像。这些是动态创建的
+并显示最新图像。按 web 页面刷新按钮更新显示</font><a target="_blank" rel="noopener noreferrer" href="https://github.com/pageauc/speed-camera/blob/master/speed_web_recent.png"><img src="https://github.com/pageauc/speed-camera/raw/master/speed_web_recent.png" alt="测速相机 RECENT 文件夹网页" style="max-width: 100%;" _mstalt="785876" _msthash="441"></a><br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/pageauc/speed-camera/blob/master/speed_web_images.png"><img src="https://github.com/pageauc/speed-camera/raw/master/speed_web_images.png" alt="Speed Camera IMAGES Folder Web Page" style="max-width: 100%;" _msthidden="A" _mstalt="782899" _msthash="442"></a></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto" _msttexthash="4313010" _msthash="444">学分</h2><a id="user-content-credits" class="anchor" aria-label="永久链接：积分" href="#credits" _mstaria-label="335361" _msthash="445"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto" _msttexthash="180467924" _msthash="446">其中一些代码基于 YouTube 教程，由
+Kyle Hounslow 在此处使用 C <a href="https://www.youtube.com/watch?v=X6rPdRZzgjg" rel="nofollow" _istranslated="1">语言 https://www.youtube.com/watch?v=X6rPdRZzgjg</a></p>
+<p dir="auto" _msttexthash="629028101" _msthash="447">感谢 <a href="http://www.pyimagesearch.com" rel="nofollow" _istranslated="1">http://www.pyimagesearch.com</a> 的 Adrian Rosebrock jrosebr1 提供 PiVideoStream 类代码，该代码可在 <a href="https://github.com/jrosebr1/imutils/blob/master/imutils/video/pivideostream.py" _istranslated="1">https://github.com/jrosebr1/imutils/blob/master/imutils/video/pivideostream.py</a> 的 github 上获得。</p>
+<p dir="auto" _msttexthash="48181094" _msthash="448">玩得开心<br _istranslated="1"> Claude Pageau<br _istranslated="1"> YouTube 频道 <a href="https://www.youtube.com/user/pageaucp" rel="nofollow" _istranslated="1">https://www.youtube.com/user/pageaucp</a><br _istranslated="1"> GitHub Repo <a href="https://github.com/pageauc" _istranslated="1">https://github.com/pageauc</a></p>
+</article></div>
